@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     await set(roomRef, {
       host: username,
       players: {
-        [username]: { score: 0 },
+        [username]: { score: 0, selectedSongs: [] },
       },
       status: "waiting",
       createdAt: Date.now(),
