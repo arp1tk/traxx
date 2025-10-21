@@ -5,40 +5,25 @@ import { v4 as uuidv4 } from "uuid";
 export async function POST(req: Request) {
   try {
     const { username } = await req.json();
-
-    if (!username) {
-      return Response.json(
-        { error: "Username is required" },
-        { status: 400 }
-      );
-    }
+    if (!username) return Response.json({ error: "Username is required" }, { status: 400 });
 
     const roomId = uuidv4().slice(0, 6).toUpperCase();
-    const roomRef = ref(db, `rooms/${roomId}`);
-    await set(roomRef, {
+    await set(ref(db, `rooms/${roomId}`), {
       host: username,
       players: {
-        [username]: { score: 0, selectedSongs: [] },
+        [username]: { 
+          score: 0, 
+          selectedSongs: [], 
+          remainingSongs: [], // Will hold the hand during battle
+          isReady: false 
+        },
       },
-      status: "waiting",
+      status: "lobby",
       createdAt: Date.now(),
     });
 
-    return Response.json(
-      {
-        roomId,
-        message: "Room created successfully",
-      },
-      { status: 200 }
-    );
+    return Response.json({ roomId, message: "Room created" }, { status: 200 });
   } catch (error: any) {
-    console.error("Error creating room:", error);
-    return Response.json(
-      {
-        error: "Internal Server Error",
-        details: error.message,
-      },
-      { status: 500 }
-    );
+    return Response.json({ error: "Internal Server Error", details: error.message }, { status: 500 });
   }
 }
